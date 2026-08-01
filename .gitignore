@@ -1,0 +1,33 @@
+# Environment variables (Secrets & Keys)
+.env
+.env.local
+.env.*.local
+*.env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Node / Next.js
+node_modules/
+phase5_nextjs_frontend/node_modules/
+phase5_nextjs_frontend/.next/
+out/
+build/
+dist/
+
+# OS / IDE / Helpers
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+powershell.cmd
+powershell.bat
