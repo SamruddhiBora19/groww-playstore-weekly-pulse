@@ -177,18 +177,6 @@ Deploying to **Streamlit Community Cloud** requires **zero Node.js or server set
 
 ---
 
-## 🔒 PII Compliance & Security
 
-Before reviews are sent to the Google Gemini LLM API, the `pii_sanitizer.py` engine strips:
-- 📧 Email addresses
-- 📞 Phone numbers (10-digit formats & country codes)
-- 💳 Demat Account numbers & PAN card IDs
-- 👤 Personal customer names & account handles
 
-All verbatim quotes presented in the report and emails are guaranteed PII-free.
 
----
-
-## 📜 License
-
-Distributed under the MIT License. See `LICENSE` for details.
