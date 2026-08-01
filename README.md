@@ -20,39 +20,20 @@ This project ingests raw user reviews from the **past 3 months (12 weeks)**, aut
 - 🎯 **3–5 Core Customer Themes**: Percentage weightage, sentiment split (Positive / Negative / Mixed), and underlying key drivers.
 - 💬 **3 Authentic Verbatim User Quotes**: Representative customer voices (PII-scrubbed).
 - 💡 **3 Strategic Action Ideas**: Direct recommendations tailored for **Product/Growth**, **Customer Support**, and **Leadership** teams.
-- ✉️ **Interactive Personalized Email Dispatcher**: Personalization controls (`Hi {recipientName},`) in Web UI, Streamlit, and CLI with direct SMTP delivery or offline HTML draft export.
-- ⚡ **Strict On-Demand Execution**: No background schedulers, cron tasks, or unwanted automation—runs solely on user request.
+- ✉️ **Interactive Personalized Email Dispatcher**: Personalization controls (`Hi {recipientName},`) with direct SMTP delivery or offline HTML draft export.
+- ⚡ **Strict On-Demand Execution**: No background schedulers or cron tasks—runs solely on user request.
 
 ---
 
 ## 🏗️ 5-Phase System Architecture
 
-```mermaid
-flowchart TD
-    subgraph UI Layer
-        NEXT[Next.js React Dashboard :3000]
-        ST[Streamlit App :8501]
-        CLI[Python CLI : cli.py]
-    end
+The system is organized into 5 modular, self-contained phase directories:
 
-    subgraph Backend Services (FastAPI :8000)
-        API1[dashboard_routes.py : /api/generate-pulse]
-        API2[email_routes.py : /api/send-email]
-    end
-
-    subgraph Core Pipeline Modules
-        P1[phase1_ingestion : Scraper & PII Sanitizer]
-        P2[phase2_llm_intelligence : Gemini 2.5 Flash]
-        P4[phase4_email_dispatcher : SMTP & HTML Builder]
-    end
-
-    NEXT -->|API Requests| API1
-    NEXT -->|Email Requests| API2
-    ST -->|Direct Integration| P1 & P2 & P4
-    CLI -->|Command Dispatcher| P1 & P2 & P4
-    API1 --> P1 --> P2
-    API2 --> P4
-```
+- **Phase 1: Data Ingestion & PII Redaction (`phase1_ingestion/`)**: Scrapes raw GROWW Play Store user reviews, sanitizes all PII (emails, phones, Demat/PAN IDs, names), and filters high-signal feedback.
+- **Phase 2: Gemini LLM Intelligence (`phase2_llm_intelligence/`)**: Sends sanitized reviews to Google Gemini 2.5 Flash LLM to cluster top themes, extract user quotes, and formulate action items.
+- **Phase 3: FastAPI REST API Services (`phase3_web_dashboard/`)**: Exposes REST API endpoints (`/api/generate-pulse`) for frontend integration.
+- **Phase 4: Personalised Email Dispatcher (`phase4_email_dispatcher/`)**: Formats responsive single-page HTML email drafts and dispatches via Gmail SMTP (`smtplib`).
+- **Phase 5: Next.js Web UI & Streamlit Dashboard (`phase5_nextjs_frontend/` & `streamlit_app.py`)**: Modern web dashboard interfaces and CLI tools.
 
 ---
 
@@ -79,104 +60,39 @@ groww playstore review weekly report/
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 How to Run
 
-### 1. Prerequisites & Installation
-
-Clone the repository and install the Python dependencies:
-
+### 1. Setup & Environment
 ```bash
-git clone https://github.com/your-username/groww-playstore-weekly-pulse.git
-cd groww-playstore-weekly-pulse
-
-# Install Python requirements
+# Install requirements
 pip install -r requirements.txt
-```
 
-### 2. Environment Configuration
-
-Copy `.env.example` to `.env` and set your **Google Gemini API Key**:
-
-```bash
+# Configure environment variables
 cp .env.example .env
 ```
+*(Add your `GEMINI_API_KEY` in `.env`)*
 
-Edit `.env`:
-```env
-# Required for Gemini LLM Inference
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
-
-# Optional: Email Dispatch Configuration via SMTP
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-```
-
----
-
-## 💻 Running the Application
-
-You can interact with the system using any of the following interfaces:
-
-### Option A: Streamlit Web App (Recommended for Quick Cloud Deployment)
-
-Launch the single-file Streamlit web app on `http://localhost:8501`:
+### 2. Run Commands
 
 ```bash
+# Launch Streamlit Web App (Port 8501)
 python cli.py streamlit
-# or
-streamlit run streamlit_app.py
-```
 
-### Option B: Next.js Dashboard + FastAPI Backend
+# Or Launch Next.js Dashboard (Port 3000) + FastAPI Backend (Port 8000)
+python cli.py serve
+python cli.py web
 
-1. **Start FastAPI Backend (Port 8000)**:
-   ```bash
-   python cli.py serve
-   ```
-2. **Start Next.js Web UI (Port 3000)**:
-   ```bash
-   python cli.py web
-   ```
-
-### Option C: Unified Python CLI (`cli.py`)
-
-Run commands directly from your terminal:
-
-```bash
-# 1. Synthesize Pulse report in terminal
+# Or Run in Terminal CLI Mode
 python cli.py pulse --weeks 12
-
-# 2. Dispatch personalized HTML email
 python cli.py email --to user@example.com --name "Samruddhi"
-
-# 3. View CLI options
-python cli.py --help
 ```
 
 ---
 
-## 🌐 Deploying to Streamlit Community Cloud
+## 🔒 PII Compliance & Security
 
-Deploying to **Streamlit Community Cloud** requires **zero Node.js or server setup**:
-
-1. Push your repository to GitHub.
-2. Go to **[share.streamlit.io](https://share.streamlit.io)** and click **New App**.
-3. Point to repository and set **Main file path** to `streamlit_app.py`.
-4. Add your environment keys under **Advanced settings → Secrets**:
-   ```toml
-   GEMINI_API_KEY = "your_gemini_api_key"
-   SMTP_HOST = "smtp.gmail.com"
-   SMTP_PORT = "587"
-   SMTP_USER = "your_email@gmail.com"
-   SMTP_PASS = "your_app_password"
-   ```
-5. Click **Deploy!**
-
----
-
-
-
-
+Before reviews are sent to the Google Gemini LLM API, the `pii_sanitizer.py` engine strips:
+- 📧 Email addresses
+- 📞 Phone numbers (10-digit formats & country codes)
+- 💳 Demat Account numbers & PAN card IDs
+- 👤 Personal customer names & account handles
